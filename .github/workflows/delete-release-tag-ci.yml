@@ -28,11 +28,18 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup git config and env vars
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          echo BUILD_LINK=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} >> $GITHUB_ENV
+          echo REPO_LINK=${{ github.server_url }}/${{ github.repository }} >> $GITHUB_ENV
+
       - name: Get previous semantic version info
         id: vars
         run: |
           git fetch --all --tags
-          REF_NAME=${{ git describe --tags }}
+          REF_NAME=$(echo git describe --tags --abbrev=0)
           previous_tag=$(echo ${REF_NAME} | cut -d '/' -f2)
           echo "previous_tag=${previous_tag}" >> $GITHUB_OUTPUT
           echo "run_number=${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
@@ -43,13 +50,6 @@ jobs:
           file: package.json
           field: version
           value: ${{ steps.vars.outputs.previous_tag }}
-
-      - name: Setup git config and env vars
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "<>"
-          echo BUILD_LINK=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} >> $GITHUB_ENV
-          echo REPO_LINK=${{ github.server_url }}/${{ github.repository }} >> $GITHUB_ENV
 
       - name: Commit revert to package.json
         run: |
