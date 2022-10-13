@@ -55,6 +55,7 @@ jobs:
         run: |
           git fetch
           git checkout ${{ github.event.master_branch }}
-          git add package.json
+          git pull origin ${{ github.event.master_branch }}
+          git add .
           git commit -m "bumping version per release ${{ steps.vars.outputs.git_tag }}"
           git push origin ${{ github.event.master_branch }} --force
