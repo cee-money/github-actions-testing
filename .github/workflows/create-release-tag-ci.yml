@@ -40,9 +40,8 @@ jobs:
         id: temp_branch
         run: |
           TEMP_BRANCH=${github-bot/version-bump/${{ steps.vars.outputs.git_tag }}}
-          git checkout ${{ github.event.master_branch }}
           git pull origin ${{ github.event.master_branch }}
-          git checkout -b github-bot/version-bump/${TEMP_BRANCH}
+          git checkout -b ${TEMP_BRANCH}
           echo "branch=${TEMP_BRANCH}" >> $GITHUB_OUTPUT
 
       - name: Update package.json version
@@ -65,6 +64,6 @@ jobs:
           git add package.json
           git commit -m "bumping version per release ${{ steps.vars.outputs.git_tag }}"
           git checkout ${{ github.event.master_branch }}
-          git merge ${{ steps.temp_branch.outputs.branch }}
+          git merge -Xtheirs ${{ steps.temp_branch.outputs.branch }}
           git branch -D ${{ steps.temp_branch.outputs.branch }}
           git push origin ${{ github.event.master_branch }} --force
