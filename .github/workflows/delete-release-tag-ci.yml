@@ -39,7 +39,7 @@ jobs:
         id: vars
         run: |
           git fetch --all --tags
-          REF_NAME=$(echo git describe --tags --abbrev=0)
+          REF_NAME=$(echo ${git describe --tags --abbrev=0})
           previous_tag=$(echo ${REF_NAME} | cut -d '/' -f2)
           echo "previous_tag=${previous_tag}" >> $GITHUB_OUTPUT
           echo "run_number=${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT

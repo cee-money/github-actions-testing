@@ -41,6 +41,9 @@ jobs:
          echo ::set-output name=deployment_url::${DEPLOYMENT_URL}
 
       - name: Comment deployment env URL on PR
+        if: |
+          github.event.pull_request.merged == false && 
+          github.event.pull_request.state == 'open'
         env:
           URL: ${{ github.event.pull_request.comments_url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
