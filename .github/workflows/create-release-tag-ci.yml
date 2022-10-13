@@ -52,10 +52,10 @@ jobs:
           echo REPO_LINK=${{ github.server_url }}/${{ github.repository }} >> $GITHUB_ENV
 
       - name: Commit update to package.json
+          # git fetch
+          # git checkout ${{ github.event.master_branch }}
+          # git pull origin ${{ github.event.master_branch }}
         run: |
-          git fetch
-          git checkout ${{ github.event.master_branch }}
-          git pull origin ${{ github.event.master_branch }}
           git add .
           git commit -m "bumping version per release ${{ steps.vars.outputs.git_tag }}"
           git push origin ${{ github.event.master_branch }} --force
