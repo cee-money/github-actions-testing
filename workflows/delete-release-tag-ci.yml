@@ -1,0 +1,60 @@
+# On delete of a release tag release/** this workflow will revert the application's base 
+# version to match the previous release tag in the package.json on the default branch
+name: REVERT_APP_VERSION_CI
+
+on: delete
+
+jobs:
+  revert-app-version-to-last-release-tag:
+    if: |
+      github.event.ref_type == 'tag' &&
+      startsWith(github.event.ref, 'release') == true
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      - name: Force install Git latest
+        run: |
+          sudo apt-get install -y software-properties-common \
+          && sudo add-apt-repository -y ppa:git-core/ppa \
+          && sudo apt-get update \
+          && sudo apt-get update \
+          && sudo apt-get install -y git jq
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Get semantic version info
+        id: vars
+        run: |
+          REF_NAME=${{ github.event.ref }}
+          GIT_TAG=$(echo ${REF_NAME} | cut -d '/' -f2)
+          echo "git_tag=${GIT_TAG}" >> $GITHUB_OUTPUT
+          echo "run_number=${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
+
+      - name: Update package.json version
+        uses: jossef/action-set-json-field@v2
+        with:
+          file: package.json
+          field: version
+          value: ${{ steps.vars.outputs.git_tag }}
+
+      - name: Setup git config and env vars
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          echo BUILD_LINK=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} >> $GITHUB_ENV
+          echo TAG_LINK=${{ github.server_url }}/${{ github.repository }}/releases/tags/${{ github.event.ref }} >> $GITHUB_ENV
+          echo REPO_LINK=${{ github.server_url }}/${{ github.repository }} >> $GITHUB_ENV
+
+      - name: Commit update to package.json
+        run: |
+          git fetch
+          git checkout ${{ github.event.master_branch }}
+          git add package.json
+          git commit -m "bumping version per release ${{ steps.vars.outputs.git_tag }}"
+          git push origin ${{ github.event.master_branch }} --force

@@ -1,0 +1,53 @@
+# Create a temporary deployment for PRs to sprint branch
+name: FEATURE_FIX_DEPLOYMENT
+
+on:
+  pull_request_target:
+    branches: [ "sprint/**" ]
+
+jobs:
+            
+  # runs NPM build and uploads the files to a specific ephemeral deployment
+  # path. This is determined from the branch name in the format
+  # feature/<ticket-num>/<short-description> or bugfix/<ticket-num>/<short-description>
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      # comcast-runner runs a old git client. We need to install the latest
+      # to actually get a git clone, since npm needs a valid git repository.
+      # - name: Force Install GIT latest
+      #   run: |
+      #     sudo apt-get install -y software-properties-common \
+      #     && sudo add-apt-repository -y ppa:git-core/ppa \
+      #     && sudo apt-get update \
+      #     && sudo apt-get update \
+      #     && sudo apt-get install -y git jq
+
+      - name: Set Variables from Github
+        id: vars
+        run: |
+         BRANCH_NAME='feature/123/testing-this-out'
+         NTID=$(echo 'cee-money_123' | cut -d '_' -f1)
+         FEATURE_NAME=$(echo ${BRANCH_NAME} | cut -d '/' -f3)
+         EPHEMERAL_DEPLOYMENT_NAME="ephemeral/${NTID}/${FEATURE_NAME}"
+         DEPLOYMENT_URL="https://gamex.np.gpe.xfinity.com/${EPHEMERAL_DEPLOYMENT_NAME}"
+         echo ::set-output name=ephemeral_deployment_name::${EPHEMERAL_DEPLOYMENT_NAME}
+         echo ::set-output name=short_ref::${BRANCH_NAME}
+         echo ::set-output name=pr_author::${NTID}
+         echo ::set-output name=deployment_url::${DEPLOYMENT_URL}
+
+      - name: Comment deployment env URL on PR
+        env:
+          URL: ${{ github.event.pull_request.comments_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl \
+            -X POST \
+            $URL \
+            -H "Content-Type: application/json" \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            --data '{ "body": "Test env ${{ steps.vars.outputs.deployment_url }}" }'
