@@ -29,15 +29,18 @@ jobs:
 
       - name: Set Variables from Github
         id: vars
+        if: |
+          github.event.pull_request.merged_at == null || 
+          github.event.pull_request.closed_at == null
         run: |
-         BRANCH_NAME='feature/123/testing-this-out'
-         NTID=$(echo 'cee-money_123' | cut -d '_' -f1)
+         BRANCH_NAME=${{ github.event.pull_request.head.ref }}
+         ID=$(echo 'cee-money' | cut -d '_' -f1)
          FEATURE_NAME=$(echo ${BRANCH_NAME} | cut -d '/' -f3)
-         EPHEMERAL_DEPLOYMENT_NAME="ephemeral/${NTID}/${FEATURE_NAME}"
-         DEPLOYMENT_URL="https://gamex.np.gpe.xfinity.com/${EPHEMERAL_DEPLOYMENT_NAME}"
+         EPHEMERAL_DEPLOYMENT_NAME="ephemeral/${ID}/${FEATURE_NAME}"
+         DEPLOYMENT_URL="https://abc.com/${EPHEMERAL_DEPLOYMENT_NAME}"
          echo ::set-output name=ephemeral_deployment_name::${EPHEMERAL_DEPLOYMENT_NAME}
          echo ::set-output name=short_ref::${BRANCH_NAME}
-         echo ::set-output name=pr_author::${NTID}
+         echo ::set-output name=pr_author::${ID}
          echo ::set-output name=deployment_url::${DEPLOYMENT_URL}
 
       - name: Comment deployment env URL on PR

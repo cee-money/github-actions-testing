@@ -53,8 +53,10 @@ jobs:
 
       - name: Commit update to package.json
         run: |
-          git fetch
-          git checkout ${{ github.event.master_branch }}
+          git checkout -b github-bot/version-bump/${{ steps.vars.outputs.git_tag }}
           git add package.json
           git commit -m "bumping version per release ${{ steps.vars.outputs.git_tag }}"
+          git checkout ${{ github.event.master_branch }}
+          git merge github-bot/version-bump/${{ steps.vars.outputs.git_tag }}
+          git branch -D github-bot/version-bump/${{ steps.vars.outputs.git_tag }}
           git push origin ${{ github.event.master_branch }} --force
