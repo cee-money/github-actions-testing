@@ -36,10 +36,10 @@ jobs:
           echo "git_tag=${GIT_TAG}" >> $GITHUB_OUTPUT
           echo "run_number=${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
     
-      - name: Checkout to new temporary branch to update package.json
+      - name: Create temporary branch
         id: temp_branch
         run: |
-          TEMP_BRANCH=${github-bot/version-bump/${{ steps.vars.outputs.git_tag }}}
+          TEMP_BRANCH=gitbot/version-bump/${{ steps.vars.outputs.git_tag }}
           git pull origin ${{ github.event.master_branch }}
           git checkout -b ${TEMP_BRANCH}
           echo "branch=${TEMP_BRANCH}" >> $GITHUB_OUTPUT
@@ -59,11 +59,11 @@ jobs:
           echo TAG_LINK=${{ github.server_url }}/${{ github.repository }}/releases/tags/${{ github.event.ref }} >> $GITHUB_ENV
           echo REPO_LINK=${{ github.server_url }}/${{ github.repository }} >> $GITHUB_ENV
 
-      - name: Commit update to package.json
+      - name: Commit update to package.json and push to main
         run: |
           git add package.json
           git commit -m "bumping version per release ${{ steps.vars.outputs.git_tag }}"
           git checkout ${{ github.event.master_branch }}
           git merge -Xtheirs ${{ steps.temp_branch.outputs.branch }}
-          git branch -D ${{ steps.temp_branch.outputs.branch }}
           git push origin ${{ github.event.master_branch }} --force
+          git branch -D ${{ steps.temp_branch.outputs.branch }}
