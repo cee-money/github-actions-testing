@@ -42,7 +42,7 @@ jobs:
 
       - name: Comment deployment env URL on PR
         if: |
-          github.event.pull_request.merged != true && 
+          github.event.pull_request.merged != true || 
           github.event.pull_request.state == 'open'
         env:
           URL: ${{ github.event.pull_request.comments_url }}
