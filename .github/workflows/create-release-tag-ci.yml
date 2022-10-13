@@ -35,6 +35,14 @@ jobs:
           GIT_TAG=$(echo ${REF_NAME} | cut -d '/' -f2)
           echo "git_tag=${GIT_TAG}" >> $GITHUB_OUTPUT
           echo "run_number=${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
+    
+      - name: Checkout to new temporary branch to update package.json
+        id: temp_branch
+        run: |
+          TEMP_BRANCH=${github-bot/version-bump/${{ steps.vars.outputs.git_tag }}}
+          git pull origin ${{ github.event.master_branch }}
+          git checkout -b github-bot/version-bump/${TEMP_BRANCH}
+          echo "branch=${TEMP_BRANCH}" >> $GITHUB_OUTPUT
 
       - name: Update package.json version
         uses: jossef/action-set-json-field@v2
@@ -52,11 +60,11 @@ jobs:
           echo REPO_LINK=${{ github.server_url }}/${{ github.repository }} >> $GITHUB_ENV
 
       - name: Commit update to package.json
+         # git merge ${{ steps.temp_branch.outputs.branch }} -X ours
         run: |
-          git checkout -b github-bot/version-bump/${{ steps.vars.outputs.git_tag }}
           git add package.json
           git commit -m "bumping version per release ${{ steps.vars.outputs.git_tag }}"
           git checkout ${{ github.event.master_branch }}
-          git merge github-bot/version-bump/${{ steps.vars.outputs.git_tag }}
-          git branch -D github-bot/version-bump/${{ steps.vars.outputs.git_tag }}
+          git merge 
+          git branch -D ${{ steps.temp_branch.outputs.branch }}
           git push origin ${{ github.event.master_branch }} --force
