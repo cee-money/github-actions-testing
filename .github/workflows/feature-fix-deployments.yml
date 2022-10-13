@@ -42,8 +42,8 @@ jobs:
 
       - name: Comment deployment env URL on PR
         if: |
-          github.event.pull_request.merged != true || 
-          github.event.pull_request.state == 'open'
+          github.event.pull_request.merged_at == null || 
+          github.event.pull_request.closed_at == null
         env:
           URL: ${{ github.event.pull_request.comments_url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
