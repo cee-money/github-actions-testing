@@ -65,6 +65,6 @@ jobs:
           git add package.json
           git commit -m "bumping version per release ${{ steps.vars.outputs.git_tag }}"
           git checkout ${{ github.event.master_branch }}
-          git merge 
+          git merge ${{ steps.temp_branch.outputs.branch }} -X ours
           git branch -D ${{ steps.temp_branch.outputs.branch }}
           git push origin ${{ github.event.master_branch }} --force
