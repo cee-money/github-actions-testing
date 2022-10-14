@@ -48,8 +48,9 @@ jobs:
           URL: ${{ github.server_url }}/${{ github.repository }}/branches/${{ steps.vars.outputs.short_ref }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          STATUS=$(curl --write-out %{http_code} --silent --output /dev/null $URL -H "Authorization: token $GITHUB_TOKEN")
-          echo "branch_active=${STATUS}" >> $GITHUB_OUTPUT
+          curl \
+            $URL
+            -H "Authorization: token $GITHUB_TOKEN" \
 
       - name: Comment deployment env URL on PR
         if: ${{ success() }} 
@@ -57,7 +58,6 @@ jobs:
           URL: ${{ github.event.pull_request.comments_url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          STATUS=${{ steps.outputs.branch.branch_active }}
           curl \
             -X POST \
             $URL \
