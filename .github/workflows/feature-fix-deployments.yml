@@ -48,11 +48,7 @@ jobs:
           URL: ${{ github.server_url }}/${{ github.repository }}/branches/${{ steps.vars.outputs.short_ref }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          curl
-          $URL \
-          -H "Accept: application/vnd.github+json" \
-          -H "Authorization: token $GITHUB_TOKEN" \
-          STATUS=$(s -o /dev/null -I -w "%{http_code}" $URL)
+          STATUS=$(curl --write-out %{http_code} --silent --output /dev/null $URL -H "Authorization: token $GITHUB_TOKEN")
           echo "branch_active=${STATUS}" >> $GITHUB_OUTPUT
 
       - name: Comment deployment env URL on PR
