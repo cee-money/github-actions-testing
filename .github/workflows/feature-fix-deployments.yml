@@ -45,7 +45,7 @@ jobs:
       - name: Check if head branch was deleted
         id: branch
         env:
-          URL: ${{ github.api.url }}/repos/${{ github.repository.owner }}/${{ github.repository }}/branches
+          URL: ${{ GITHUB_API_URL }}/repos/${{ GITHUB_REPOSITORY }}/branches
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           curl \
