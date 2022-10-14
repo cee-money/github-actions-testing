@@ -49,7 +49,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           curl \
-            -H "Authorization: token $GITHUB_TOKEN"
+            -H "Authorization: token $GITHUB_TOKEN" \
             $URL
 
       - name: Comment deployment env URL on PR
