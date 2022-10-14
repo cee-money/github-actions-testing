@@ -19,13 +19,13 @@ jobs:
     steps:
       # comcast-runner runs a old git client. We need to install the latest
       # to actually get a git clone, since npm needs a valid git repository.
-      # - name: Force Install GIT latest
-      #   run: |
-      #     sudo apt-get install -y software-properties-common \
-      #     && sudo add-apt-repository -y ppa:git-core/ppa \
-      #     && sudo apt-get update \
-      #     && sudo apt-get update \
-      #     && sudo apt-get install -y git jq
+      - name: Force Install GIT latest
+        run: |
+          sudo apt-get install -y software-properties-common \
+          && sudo add-apt-repository -y ppa:git-core/ppa \
+          && sudo apt-get update \
+          && sudo apt-get update \
+          && sudo apt-get install -y git jq
 
       - name: Set Variables from Github
         id: vars
@@ -45,8 +45,9 @@ jobs:
 
       - name: Comment deployment env URL on PR
         if: |
-          github.event.pull_request.merged_at == null || 
-          github.event.pull_request.closed_at == null
+          success() && 
+          (github.event.pull_request.merged_at == null || 
+          github.event.pull_request.closed_at == null)
         env:
           URL: ${{ github.event.pull_request.comments_url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
