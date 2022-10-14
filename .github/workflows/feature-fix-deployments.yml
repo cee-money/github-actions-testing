@@ -42,17 +42,19 @@ jobs:
           echo ::set-output name=pr_author::${ID}
           echo ::set-output name=deployment_url::${DEPLOYMENT_URL}
 
+      - name: Checkout to repository
+        uses: actions/checkout@v3
+
       - name: Check if head branch was deleted
-      - uses: actions/checkout@v3
+        id: branch_active
         run: |
-          git fetch
-          BRANCHES=git branch -r
-          for branch in $BRANCHES; do
-            echo $branch
-          done
+         BRANCH_ACTIVE=$(echo git ls-remote --heads 2>/dev/null|awk -F 'refs/heads/' '{print $2}'|grep -x "${{ steps.vars.outputs.short_ref }}"|wc -l)
+         echo "branch_active=${BRANCH_ACTIVE}" >> $GITHUB_OUTPUT
 
       - name: Comment deployment env URL on PR
-        if: ${{ success() }} 
+        if: |
+          success() &&
+          steps.outputs.branch_active.branch_active == 1
         env:
           URL: ${{ github.event.pull_request.comments_url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
