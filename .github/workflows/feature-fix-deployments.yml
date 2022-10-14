@@ -46,7 +46,7 @@ jobs:
       - name: Check if head branch was deleted
         id: branch
         env:
-          URL: ${{ github.server_url }}/${{ github.repository }}/branches/{{ steps.vars.outputs.short_ref }}
+          URL: ${{ github.server_url }}/${{ github.repository }}/branches/${{ steps.vars.outputs.short_ref }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
         run: |
           curl \
