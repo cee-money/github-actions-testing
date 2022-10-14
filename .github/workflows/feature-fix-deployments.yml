@@ -50,6 +50,7 @@ jobs:
         run: |
           RESPONSE=$(curl --silent --write-out "HTTPSTATUS:%{http_code}" $URL -H "Accept: application/vnd.github+json" -H "Authorization: token $GITHUB_TOKEN")
           STATUS=$(echo $HTTP_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+          echo "$STATUS"
           echo "branch_active=${STATUS}" >> $GITHUB_OUTPUT
 
       - name: Comment deployment env URL on PR
