@@ -45,12 +45,12 @@ jobs:
       - name: Check if head branch was deleted
         id: branch
         env:
-          URL: ${{ github.server_url }}/${{ github.repository }}/branches/${{ steps.vars.outputs.short_ref }}
+          URL: ${{ github.server_url }}/${{ github.repository }}/branches
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           curl \
+            -H "Authorization: token $GITHUB_TOKEN"
             $URL
-            -H "Authorization: token $GITHUB_TOKEN" \
 
       - name: Comment deployment env URL on PR
         if: ${{ success() }} 
