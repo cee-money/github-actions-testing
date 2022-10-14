@@ -40,17 +40,14 @@ jobs:
           echo ::set-output name=deployment_url::${DEPLOYMENT_URL}
 
       - name: Checkout to repository
+        id: branch_active
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-
-      - name: Check if head branch was deleted
-        id: branch_active
         run: |
-         git fetch origin
-         FULL_NAME=${{ github.event.pull_request.head.ref }}
-         BRANCH_ACTIVE=git ls-remote --heads 2>/dev/null|awk -F 'refs/heads/' '{print $2}'|grep -x feature/ABC-123/this-is-the-feature |wc -l
-         echo "branch_active=${BRANCH_ACTIVE}" >> $GITHUB_OUTPUT
+          FULL_NAME=${{ github.event.pull_request.head.ref }}
+          BRANCH_ACTIVE=git ls-remote --heads 2>/dev/null|awk -F 'refs/heads/' '{print $2}'|grep -x ${FULL_NAME} |wc -l
+          echo "branch_active=${BRANCH_ACTIVE}" >> $GITHUB_OUTPUT
 
       - name: Comment deployment env URL on PR
         if: |
