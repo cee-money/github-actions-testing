@@ -43,14 +43,13 @@ jobs:
           echo ::set-output name=deployment_url::${DEPLOYMENT_URL}
 
       - name: Check if head branch was deleted
-        id: branch
-        env:
-          URL: ${{ GITHUB_API_URL }}/repos/${{ GITHUB_REPOSITORY }}/branches
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v3
         run: |
-          curl \
-            -H "Authorization: token $GITHUB_TOKEN" \
-            $URL
+          git fetch
+          BRANCHES=git branch -r
+          for branch in $BRANCHES; do
+            echo $branch
+          done
 
       - name: Comment deployment env URL on PR
         if: ${{ success() }} 
