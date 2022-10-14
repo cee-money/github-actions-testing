@@ -48,7 +48,7 @@ jobs:
           URL: ${{ github.server_url }}/${{ github.repository }}/branches/${{ steps.vars.outputs.short_ref }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          RESPONSE=$(curl --silent --write-out "HTTPSTATUS:%{http_code}" $URL -H "Accept: application/vnd.github+json" -H "Authorization: token $GITHUB_TOKEN" \)
+          RESPONSE=$(curl --silent --write-out "HTTPSTATUS:%{http_code}" $URL -H "Accept: application/vnd.github+json" -H "Authorization: token $GITHUB_TOKEN")
           STATUS=$(echo $HTTP_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
           echo "branch_active=${STATUS}" >> $GITHUB_OUTPUT
 
