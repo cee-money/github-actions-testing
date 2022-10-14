@@ -42,12 +42,25 @@ jobs:
          echo ::set-output name=short_ref::${BRANCH_NAME}
          echo ::set-output name=pr_author::${ID}
          echo ::set-output name=deployment_url::${DEPLOYMENT_URL}
+      
+      - name: Check if head branch was deleted
+        id: branch
+        env:
+          URL: ${{ github.server_url }}/${{ github.repository }}/branches/{{ steps.vars.outputs.short_ref }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+        run: |
+          curl \
+            -L -w "%{http_code} %{url_effective}\\n"
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            $URL
+            STATUS=$(echo $PATCH | tail -n 1)
+            echo "branch_active=${STATUS}" >> $GITHUB_OUTPUT
 
       - name: Comment deployment env URL on PR
         if: |
           success() && 
-          (github.event.pull_request.merged_at == null || 
-          github.event.pull_request.closed_at == null)
+          steps.outputs.branch.branch_active == 200
         env:
           URL: ${{ github.event.pull_request.comments_url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
