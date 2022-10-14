@@ -50,7 +50,7 @@ jobs:
         run: |
          git fetch origin
          FULL_NAME=${{ github.event.pull_request.head.ref }}
-         BRANCH_ACTIVE=$(echo git branch -r --contains ${FULL_NAME})
+         BRANCH_ACTIVE=$(echo git ls-remote --heads 2>/dev/null|awk -F 'refs/heads/' '{print $2}'|grep -x ${FULL_NAME}|wc -l)
          echo "branch_active=${BRANCH_ACTIVE}" >> $GITHUB_OUTPUT
 
       - name: Comment deployment env URL on PR
