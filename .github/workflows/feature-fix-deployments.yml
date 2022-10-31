@@ -45,26 +45,6 @@ jobs:
           echo ::set-output name=deployment_url::${DEPLOYMENT_URL}
           echo ::set-output name=run_number::${GITHUB_RUN_NUMBER}
 
-<<<<<<< Updated upstream
-      - name: Checkout to repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      
-      - name: Check for remote branch
-        id: branch_active
-        run: |
-          git fetch --all
-          git pull --all
-          FULL_NAME=main
-          BRANCH_ACTIVE=$(echo git ls-remote --heads 2>/dev/null|awk -F 'refs/heads/' '{print $2}'|grep -x 'main' |wc -l)
-          echo "branch_active=${BRANCH_ACTIVE}" >> $GITHUB_OUTPUT
-      
-      - name: Debug
-        run: echo ${{ steps.outputs.branch_active.branch_active }} | sed 's/./& /g' 
-      
-=======
->>>>>>> Stashed changes
       - name: Comment deployment env URL on PR
         if: ${{ success() }}
         env:
