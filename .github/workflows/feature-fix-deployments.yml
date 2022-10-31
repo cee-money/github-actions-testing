@@ -1,16 +1,21 @@
-# Create a temporary deployment for PRs to sprint branch
-name: FEATURE_FIX_DEPLOYMENT
+# Create an ephemeral deployment of the head branch for PRs to the sprint branch
+name: FEATURE_FIX_DEPLOYMENTS
 
 on:
   pull_request_target:
-    branches: ["sprint/**"]
+    branches: ["sprint/**", "main"]
 
 jobs:
-  # runs NPM build and uploads the files to a specific ephemeral deployment
-  # path. This is determined from the branch name in the format
-  # feature/<ticket-num>/<short-description> or bugfix/<ticket-num>/<short-description>
+  # Runs NPM build and uploads the files to a specific ephemeral deployment
+  # path. This deployment path is determined by the branch name formatted as
+  # feature/<ticket>/<description> or bugfix/<ticket>/<description> or
+  # hotfix/<ticket>/<description>
   build_and_deploy:
-    runs-on: ubuntu-latest
+    if: |
+      (startsWith(github.event.pull_request.head.ref, 'feature') && startsWith(github.event.pull_request.base.ref, 'sprint')) || 
+      (startsWith(github.event.pull_request.head.ref, 'bugfix') && startsWith(github.event.pull_request.base.ref, 'sprint')) ||
+      (!startsWith(github.event.pull_request.head.ref, 'sprint') && github.event.pull_request.base.ref == 'main')
+    runs-on: comcast-runner
     strategy:
       matrix:
         node-version: [16.x]
@@ -29,16 +34,18 @@ jobs:
       - name: Set Variables from Github
         id: vars
         run: |
-          BRANCH_NAME=main
-          ID=$(echo 'cee-money' | cut -d '_' -f1)
+          BRANCH_NAME=${{ github.event.pull_request.head.ref }}
+          NTID=$(echo ${{ github.event.pull_request.user.login }} | cut -d '_' -f1)
           FEATURE_NAME=$(echo ${BRANCH_NAME} | cut -d '/' -f3)
-          EPHEMERAL_DEPLOYMENT_NAME="ephemeral/${ID}/${FEATURE_NAME}"
-          DEPLOYMENT_URL="https://abc.com/${EPHEMERAL_DEPLOYMENT_NAME}"
+          EPHEMERAL_DEPLOYMENT_NAME="ephemeral/${NTID}/${FEATURE_NAME}"
+          DEPLOYMENT_URL="https://gamex.np.gpe.xfinity.com/${EPHEMERAL_DEPLOYMENT_NAME}/index.html#$"
           echo ::set-output name=ephemeral_deployment_name::${EPHEMERAL_DEPLOYMENT_NAME}
           echo ::set-output name=short_ref::${BRANCH_NAME}
-          echo ::set-output name=pr_author::${ID}
+          echo ::set-output name=pr_author::${NTID}
           echo ::set-output name=deployment_url::${DEPLOYMENT_URL}
+          echo ::set-output name=run_number::${GITHUB_RUN_NUMBER}
 
+<<<<<<< Updated upstream
       - name: Checkout to repository
         uses: actions/checkout@v3
         with:
@@ -56,10 +63,10 @@ jobs:
       - name: Debug
         run: $(echo ${{ steps.outputs.branch_active.branch_active }} | sed 's/./& /g')
       
+=======
+>>>>>>> Stashed changes
       - name: Comment deployment env URL on PR
-        if: |
-          success() &&
-          steps.outputs.branch_active.branch_active == 1
+        if: ${{ success() }}
         env:
           URL: ${{ github.event.pull_request.comments_url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -70,3 +77,35 @@ jobs:
             -H "Content-Type: application/json" \
             -H "Authorization: token $GITHUB_TOKEN" \
             --data '{ "body": "Test env ${{ steps.vars.outputs.deployment_url }}" }'
+
+      # - name: Checkout to repository
+      #   uses: actions/checkout@v3
+      #   with:
+      #     fetch-depth: 0
+
+      # - name: Check for remote branch
+      #   id: branch_active
+      #   run: |
+      #     git fetch --all
+      #     git pull --all
+      #     FULL_NAME=main
+      #     BRANCH_ACTIVE=$(echo git ls-remote --heads 2>/dev/null|awk -F 'refs/heads/' '{print $2}'|grep -x 'main' |wc -l)
+      #     echo "branch_active=${BRANCH_ACTIVE}" >> $GITHUB_OUTPUT
+
+      # - name: Debug
+      #   run: $(echo ${{ steps.outputs.branch_active.branch_active }} | sed 's/./& /g')
+
+      # - name: Comment deployment env URL on PR
+      #   if: |
+      #     success() &&
+      #     steps.outputs.branch_active.branch_active == 1
+      #   env:
+      #     URL: ${{ github.event.pull_request.comments_url }}
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     curl \
+      #       -X POST \
+      #       $URL \
+      #       -H "Content-Type: application/json" \
+      #       -H "Authorization: token $GITHUB_TOKEN" \
+      #       --data '{ "body": "Test env ${{ steps.vars.outputs.deployment_url }}" }'
