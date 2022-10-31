@@ -15,7 +15,7 @@ jobs:
       (startsWith(github.event.pull_request.head.ref, 'feature') && startsWith(github.event.pull_request.base.ref, 'sprint')) || 
       (startsWith(github.event.pull_request.head.ref, 'bugfix') && startsWith(github.event.pull_request.base.ref, 'sprint')) ||
       (!startsWith(github.event.pull_request.head.ref, 'sprint') && github.event.pull_request.base.ref == 'main')
-    runs-on: comcast-runner
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [16.x]
